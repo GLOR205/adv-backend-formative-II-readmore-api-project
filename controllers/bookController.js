@@ -31,9 +31,30 @@ exports.createBook = async (req, res) => {
   }
 };
 
+// Rule 5: dynamic filter, search, sort (+ pagination challenge)
 exports.getBooks = async (req, res) => {
   try {
-    res.json(await Book.find().populate('author'));
+    const { genre, author, minPrice, maxPrice, search, sort, order } = req.query;
+
+    // Start empty; add a condition ONLY if its param was sent
+    const filter = {};
+    if (genre) filter.genre = new RegExp(`^${escapeRegex(genre)}$`, 'i');
+    if (author) filter.author = author;
+    if (search) filter.title = new RegExp(escapeRegex(search), 'i');
+    if (minPrice || maxPrice) {
+      filter.price = {};
+      if (minPrice) filter.price.$gte = Number(minPrice);
+      if (maxPrice) filter.price.$lte = Number(maxPrice);
+    }
+
+    let query = Book.find(filter).populate('author');
+
+    const allowedSort = ['price', 'title', 'publishedYear'];
+    if (allowedSort.includes(sort)) {
+      query = query.sort({ [sort]: order === 'desc' ? -1 : 1, _id: 1 });
+    }
+
+    res.json(await query);
   } catch (error) {
     handleError(res, error);
   }
