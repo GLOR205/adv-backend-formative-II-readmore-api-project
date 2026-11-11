@@ -34,7 +34,7 @@ exports.createBook = async (req, res) => {
 // Rule 5: dynamic filter, search, sort (+ pagination challenge)
 exports.getBooks = async (req, res) => {
   try {
-    const { genre, author, minPrice, maxPrice, search, sort, order } = req.query;
+    const { genre, author, minPrice, maxPrice, search, sort, order, page, limit } = req.query;
 
     // Start empty; add a condition ONLY if its param was sent
     const filter = {};
@@ -52,6 +52,15 @@ exports.getBooks = async (req, res) => {
     const allowedSort = ['price', 'title', 'publishedYear'];
     if (allowedSort.includes(sort)) {
       query = query.sort({ [sort]: order === 'desc' ? -1 : 1, _id: 1 });
+    }
+
+    // Paginate only when page or limit is sent; otherwise return everything
+    if (page || limit) {
+      const pageNum = Math.max(parseInt(page) || 1, 1);
+      const limitNum = Math.min(Math.max(parseInt(limit) || 10, 1), 100);
+      const total = await Book.countDocuments(filter);
+      const results = await query.skip((pageNum - 1) * limitNum).limit(limitNum);
+      return res.json({ page: pageNum, limit: limitNum, total, results });
     }
 
     res.json(await query);
