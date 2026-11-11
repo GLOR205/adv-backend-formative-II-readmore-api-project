@@ -198,3 +198,7 @@ Submit a **a Github repository link** containing your project code. The reposito
 
 Good luck — build it one endpoint at a time, and test each in your API client before moving on.
 ---
+
+## My Implementation
+- Setup: copy `.env.example` to `.env`, add your MongoDB connection string (Atlas or local), run `npm install`, then `npm run dev`.
+- Author-delete policy: Option A (block with 409). An author who still has books cannot be deleted; the books must be deleted first. See the video for the justification and downsides.
