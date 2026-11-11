@@ -82,3 +82,13 @@ exports.updateBook = async (req, res) => {
     handleError(res, error);
   }
 };
+
+exports.deleteBook = async (req, res) => {
+  try {
+    const book = await Book.findByIdAndDelete(req.params.id);
+    if (!book) return res.status(404).json({ error: 'Book not found' });
+    res.json({ message: 'Book deleted' });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
