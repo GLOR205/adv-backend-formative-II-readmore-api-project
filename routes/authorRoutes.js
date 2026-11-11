@@ -2,6 +2,6 @@ const router = require('express').Router();
 const c = require('../controllers/authorController');
 
 router.route('/').post(c.createAuthor).get(c.getAuthors);
-router.route('/:id').get(c.getAuthorById);
+router.route('/:id').get(c.getAuthorById).put(c.updateAuthor);
 
 module.exports = router;

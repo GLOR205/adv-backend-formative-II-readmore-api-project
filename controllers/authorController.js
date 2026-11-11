@@ -28,3 +28,18 @@ exports.getAuthorById = async (req, res) => {
     handleError(res, error);
   }
 };
+
+exports.updateAuthor = async (req, res) => {
+  try {
+    const { name, country, bio } = req.body;
+    const author = await Author.findByIdAndUpdate(
+      req.params.id,
+      { name, country, bio },
+      { new: true, runValidators: true }
+    );
+    if (!author) return res.status(404).json({ error: 'Author not found' });
+    res.json(author);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
