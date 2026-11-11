@@ -10,3 +10,11 @@ exports.createAuthor = async (req, res) => {
     handleError(res, error);
   }
 };
+
+exports.getAuthors = async (req, res) => {
+  try {
+    res.json(await Author.find());
+  } catch (error) {
+    handleError(res, error);
+  }
+};
