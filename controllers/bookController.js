@@ -38,3 +38,13 @@ exports.getBooks = async (req, res) => {
     handleError(res, error);
   }
 };
+
+exports.getBookById = async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id).populate('author');
+    if (!book) return res.status(404).json({ error: 'Book not found' });
+    res.json(book);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
