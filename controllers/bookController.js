@@ -48,3 +48,37 @@ exports.getBookById = async (req, res) => {
     handleError(res, error);
   }
 };
+
+// The same rules apply on update, otherwise PUT would bypass them
+exports.updateBook = async (req, res) => {
+  try {
+    const book = await Book.findById(req.params.id);
+    if (!book) return res.status(404).json({ error: 'Book not found' });
+
+    const { title, genre, price, publishedYear, author } = req.body;
+
+    if (author !== undefined && !(await Author.exists({ _id: author }))) {
+      return res.status(400).json({ error: 'No author exists with that id' });
+    }
+
+    const ruleError = checkPriceAndYear({ price, publishedYear });
+    if (ruleError) return res.status(422).json({ error: ruleError });
+
+    const finalTitle = title ?? book.title;
+    const finalAuthor = author ?? book.author;
+    if (await titleExistsForAuthor(finalTitle, finalAuthor, book._id)) {
+      return res.status(409).json({ error: 'This author already has a book with that title' });
+    }
+
+    // Only apply the fields that were actually sent
+    const updates = Object.fromEntries(
+      Object.entries({ title, genre, price, publishedYear, author }).filter(([, v]) => v !== undefined)
+    );
+    book.set(updates);
+    await book.save();
+    await book.populate('author');
+    res.json(book);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
