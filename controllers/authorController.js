@@ -76,3 +76,38 @@ exports.getBooksByAuthor = async (req, res) => {
     handleError(res, error);
   }
 };
+
+// Rule 6: author statistics
+exports.getAuthorStats = async (req, res) => {
+  try {
+    const author = await Author.findById(req.params.id);
+    if (!author) return res.status(404).json({ error: 'Author not found' });
+
+    const books = await Book.find({ author: author._id });
+
+    // "Sensible" when there are no books: zero count, zero average, null titles
+    if (books.length === 0) {
+      return res.json({
+        author: author.name,
+        bookCount: 0,
+        averagePrice: 0,
+        cheapestBook: null,
+        mostExpensiveBook: null,
+      });
+    }
+
+    const totalPrice = books.reduce((sum, b) => sum + b.price, 0);
+    const cheapest = books.reduce((min, b) => (b.price < min.price ? b : min));
+    const priciest = books.reduce((max, b) => (b.price > max.price ? b : max));
+
+    res.json({
+      author: author.name,
+      bookCount: books.length,
+      averagePrice: Math.round((totalPrice / books.length) * 100) / 100,
+      cheapestBook: cheapest.title,
+      mostExpensiveBook: priciest.title,
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
