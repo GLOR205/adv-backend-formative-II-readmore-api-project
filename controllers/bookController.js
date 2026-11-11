@@ -30,3 +30,11 @@ exports.createBook = async (req, res) => {
     handleError(res, error);
   }
 };
+
+exports.getBooks = async (req, res) => {
+  try {
+    res.json(await Book.find().populate('author'));
+  } catch (error) {
+    handleError(res, error);
+  }
+};
