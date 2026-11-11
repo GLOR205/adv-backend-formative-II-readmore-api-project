@@ -64,3 +64,15 @@ exports.deleteAuthor = async (req, res) => {
     handleError(res, error);
   }
 };
+
+exports.getBooksByAuthor = async (req, res) => {
+  try {
+    const author = await Author.findById(req.params.id);
+    if (!author) return res.status(404).json({ error: 'Author not found' });
+
+    const books = await Book.find({ author: author._id }).populate('author');
+    res.json(books);
+  } catch (error) {
+    handleError(res, error);
+  }
+};
